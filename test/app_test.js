@@ -5,7 +5,8 @@ const expect = chai.expect;
 const app = require('../src/app');
 const gameState = require('../src/league');
 const leagueRenderer = require('../src/league_renderer');
-const fileService = require('../src/file_service');
+const fs = require('fs');
+const {createAndPopulateLeague} = require('./league_test');
 
 describe('app command processing', function () {
 
@@ -57,28 +58,31 @@ describe('app command processing', function () {
   });
 
   it('allows for saving the state to specified path', function () {
-    const league = gameState.createLeague();
+    const players = [['Alice'], ['Bob']];
+    const league = createAndPopulateLeague(players);
+
     const path = 'some/file/path';
-    const mockedFileRegister = this.sinon.mock(fileService, 'save');
-    mockedFileRegister.expects('save').once().withArgs(path, league);
+    const fsMock = this.sinon.mock(fs, 'writeFileSync');
+    fsMock.expects('writeFileSync').once().withArgs(path, JSON.stringify(players), {flag: 'w'});
 
     const game = app.startGame(league);
 
     game.sendCommand(`save ${path}`);
-
-    mockedFileRegister.verify();
+    fsMock.verify();
   });
 
   it('allows for loading the state to specified path', function () {
+    const players = [['Alice'], ['Bob']];
+
     const league = gameState.createLeague();
     const path = 'some/file/path';
-    const mockedFileRegister = this.sinon.mock(fileService, 'load');
-    mockedFileRegister.expects('load').once().withArgs(path);
+    const fsStub = this.sinon.stub(fs, 'readFileSync');
+    fsStub.withArgs(path, 'utf8').returns(JSON.stringify(players));
 
     const game = app.startGame(league);
 
     game.sendCommand(`load ${path}`);
 
-    mockedFileRegister.verify();
+    expect(game.sendCommand('winner')).to.equal('Alice');
   });
 });
