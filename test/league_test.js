@@ -26,18 +26,18 @@ describe('league', function () {
 
     it('refuses to add a player with a name with a tailing whitespace', function () {
       const league = gameState.createLeague();
-      expect(() => {league.addPlayer('Bob ');}).to.throw();
+      expect(() => {league.addPlayer('Bob ');}).to.throw('Player name Bob  contains invalid characters');
     });
 
     it('refuses to add a player with a name a special character', function () {
       const league = gameState.createLeague();
-      expect(() => {league.addPlayer('Bob#');}).to.throw();
+      expect(() => {league.addPlayer('Bob#');}).to.throw('Player name Bob# contains invalid characters');
     });
 
     it('refuses to add a player with a name that matches an existing player', function () {
       const league = createAndPopulateLeague(['Bob']);
 
-      expect(() => {league.addPlayer('Bob');}).to.throw();
+      expect(() => {league.addPlayer('Bob');}).to.throw('Cannot add player \'Bob\' because they are already in the game');
     });
   });
 
@@ -73,19 +73,19 @@ describe('league', function () {
     });
 
     it('refuses to record wins on the same level', () => {
-      expect(() => {league.recordWin('Eve', 'Daniel');}).to.throw();
+      expect(() => {league.recordWin('Eve', 'Daniel');}).to.throw('Cannot record match result. Winner \'Eve\' must be one row below loser \'Daniel\'');
     });
 
     it('refuses to record after challenger looses', () => {
-      expect(() => {league.recordWin('Charlie', 'Daniel');}).to.throw();
+      expect(() => {league.recordWin('Charlie', 'Daniel');}).to.throw('Cannot record match result. Winner \'Charlie\' must be one row below loser \'Daniel\'');
     });
 
     it('refuses to record wins if there is more than one row difference', () => {
-      expect(() => {league.recordWin('Amy', 'Daniel');}).to.throw();
+      expect(() => {league.recordWin('Amy', 'Daniel');}).to.throw('Cannot record match result. Winner \'Amy\' must be one row below loser \'Daniel\'');
     });
 
     it('refuses to record wins for non existent plays', () => {
-      expect(() => {league.recordWin('Amy', 'George');}).to.throw();
+      expect(() => {league.recordWin('Amy', 'George');}).to.throw('Player \'George\' is not in the game');
     });
   });
 
@@ -97,6 +97,17 @@ describe('league', function () {
       league.recordWin('Bob', 'Amy');
 
       expect(league.getWinner()).to.equal('Bob');
+    });
+
+    it('determines winner after multiple wins', function () {
+      const initialPlayerStructure = [['Amy'], ['Bob', 'Charlie'], ['Daniel', 'Eve']];
+      let league = createAndPopulateLeague(initialPlayerStructure);
+
+      league.recordWin('Bob', 'Amy');
+      league.recordWin('Daniel', 'Charlie');
+      league.recordWin('Daniel', 'Bob');
+
+      expect(league.getWinner()).to.equal('Daniel');
     });
 
     it('yields null for an empty league', function () {
