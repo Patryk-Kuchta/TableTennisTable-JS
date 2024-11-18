@@ -5,7 +5,7 @@ const expect = chai.expect;
 const app = require('../src/app');
 const gameState = require('../src/league');
 const leagueRenderer = require('../src/league_renderer');
-const fs = require('fs');
+const fs = require('node:fs');
 const {createAndPopulateLeague} = require('./league_test');
 
 describe('app command processing', function () {
