@@ -3,11 +3,20 @@ const expect = chai.expect;
 
 const gameState = require('../src/league');
 
+function createAndPopulateLeague (playerList) {
+  const league = gameState.createLeague();
+
+  for (const player of playerList.flat()) {
+    league.addPlayer(player);
+  }
+
+  return league;
+}
+
 describe('league', function () {
   describe('#addPlayer', function () {
     it('adds a player to the game', function () {
-      const league = gameState.createLeague();
-      league.addPlayer('Bob');
+      const league = createAndPopulateLeague(['Bob']);
 
       const players = league.getPlayers();
 
@@ -26,9 +35,8 @@ describe('league', function () {
     });
 
     it('refuses to add a player with a name that matches an existing player', function () {
-      const league = gameState.createLeague();
+      const league = createAndPopulateLeague(['Bob']);
 
-      league.addPlayer('Bob');
       expect(() => {league.addPlayer('Bob');}).to.throw();
     });
   });
@@ -36,22 +44,14 @@ describe('league', function () {
   describe('#getPlayers', function () {
     it('return the expected set of players', () => {
       const listOfPlayers = ['Amy', 'Bob', 'Charlie'];
-      const league = gameState.createLeague();
-
-      for (const player of listOfPlayers) {
-        league.addPlayer(player);
-      }
+      const league = createAndPopulateLeague(listOfPlayers);
 
       expect(league.getPlayers().flat()).to.deep.equal(listOfPlayers);
     });
 
     it('return the expected set of players in the expected format', () => {
       const playerStructure = [['Amy'], ['Bob', 'Charlie'], ['Daniel', 'Eve']];
-      const league = gameState.createLeague();
-
-      for (const player of playerStructure.flat()) {
-        league.addPlayer(player);
-      }
+      const league = createAndPopulateLeague(playerStructure);
 
       expect(league.getPlayers()).to.deep.equal(playerStructure);
     });
@@ -63,11 +63,7 @@ describe('league', function () {
     let league;
 
     beforeEach(function () {
-      league = gameState.createLeague();
-
-      for (const player of initialPlayerStructure.flat()) {
-        league.addPlayer(player);
-      }
+      league = createAndPopulateLeague(initialPlayerStructure);
     });
 
     it('promotes players correctly for valid matches', () => {
@@ -96,11 +92,7 @@ describe('league', function () {
   describe('#getWinner', function () {
     it('yields the correct winner', function () {
       const initialPlayerStructure = [['Amy'], ['Bob', 'Charlie'], ['Daniel', 'Eve']];
-      let league = gameState.createLeague();
-
-      for (const player of initialPlayerStructure.flat()) {
-        league.addPlayer(player);
-      }
+      let league = createAndPopulateLeague(initialPlayerStructure);
 
       league.recordWin('Bob', 'Amy');
 
