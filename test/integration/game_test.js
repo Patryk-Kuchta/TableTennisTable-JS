@@ -33,17 +33,6 @@ describe('league app', function () {
     expect(game.sendCommand('print')).to.equal('No players yet');
   });
 
-  it('prints non-empty game states', function () {
-    const game = app.startGame(gameState.createLeague());
-    const expectedLeagueStructure = [['Alice'], ['Bob', 'Charlie'], ['David']];
-
-    for (const player of expectedLeagueStructure.flat()) {
-      game.sendCommand(`add player ${player}`);
-    }
-
-    expect(isOutputOfExpectedStructure(expectedLeagueStructure, game.sendCommand('print'))).to.equal(true);
-  });
-
   it('prints an error if an invalid player name is provided', function () {
     const game = app.startGame(gameState.createLeague());
 
@@ -62,5 +51,37 @@ describe('league app', function () {
 
     expect(game.sendCommand(command)).to.equal(
         `Cannot add player '${repeatedName}' because they are already in the game`);
+  });
+
+
+});
+
+describe('league app with a structure of users', function () {
+
+  let game;
+  const initialLeagueStructure = [['Alice'], ['Bob', 'Charlie'], ['David']];
+
+  beforeEach(function () {
+    game = app.startGame(gameState.createLeague());
+
+    for (const player of initialLeagueStructure.flat()) {
+      game.sendCommand(`add player ${player}`);
+    }
+  });
+
+  it('prints the game state for games with 5 players', function () {
+    expect(isOutputOfExpectedStructure(initialLeagueStructure, game.sendCommand('print'))).to.equal(true);
+  });
+
+  it('prints the correct winner when requested', function () {
+    expect(game.sendCommand('winner')).to.equal('Alice');
+  });
+
+  it('records and adjusts for the wins correctly', function () {
+    game.sendCommand('record win Bob Alice');
+
+    const alteredLeagueStructure = [['Bob'], ['Alice', 'Charlie'], ['David']];
+
+    expect(isOutputOfExpectedStructure(alteredLeagueStructure, game.sendCommand('print'))).to.equal(true);
   });
 });
