@@ -13,6 +13,8 @@ function createAndPopulateLeague (playerList) {
   return league;
 }
 
+exports.createAndPopulateLeague = createAndPopulateLeague;
+
 describe('league', function () {
   describe('#addPlayer', function () {
     it('adds a player to the game', function () {
